@@ -12,8 +12,7 @@ pipeline {
         sh 'python3 test_app.py'
         script {
           try {
-            def projectName = params.project_name ?: "Unknown Project"
-            input(id: "Deploy Gate", message: "Deploy ${projectName}?", ok: 'Deploy')
+            input(id: "Deploy Gate", message: "Deploy ${params.project_name}?", ok: 'Deploy')
           } catch (err) {
             echo "Deployment aborted by user."
             currentBuild.result = 'ABORTED'
@@ -25,7 +24,7 @@ pipeline {
 
     stage('Deploy') {
       steps {
-        echo "Deploying the application"
+        echo "deploying the application"
       }
     }
   }
@@ -36,11 +35,8 @@ pipeline {
       junit allowEmptyResults: true, testResults: '**/test_reports/*.xml'
     }
     success {
-      script {
-        echo "Starting Flask Application..."
-        sh "nohup python3 app.py > log.txt 2>&1 & echo \$! > app.pid"
-        echo "Flask Application Up and running!!"
-      }
+      sh "nohup python3 app.py > log.txt 2>&1 &"
+      echo "Flask Application Up and running!!"
     }
     failure {
       echo 'Build stage failed'
